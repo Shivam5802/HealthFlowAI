@@ -1,0 +1,297 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================================
+// ENUMS
+// ==========================================
+
+enum Role {
+  ADMIN
+  HOSPITAL_MANAGER
+  SUPPLY_MANAGER
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum FacilityType {
+  HOSPITAL
+  PHC
+  CLINIC
+  OTHER
+}
+
+enum FacilityStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum ResourceCategory {
+  MEDICINE
+  MEDICAL_SUPPLY
+  EQUIPMENT
+  BED
+  OTHER
+}
+
+enum RiskLevel {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum AlertType {
+  STOCKOUT_RISK
+  DEMAND_SURGE
+  LOW_STOCK
+  TRANSFER_REQUEST
+  TRANSFER_APPROVED
+  TRANSFER_COMPLETED
+  SYSTEM
+}
+
+enum AlertSeverity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+enum AlertStatus {
+  OPEN
+  ACKNOWLEDGED
+  RESOLVED
+}
+
+enum TransferStatus {
+  REQUESTED
+  APPROVED
+  PACKED
+  IN_TRANSIT
+  DELIVERED
+  CANCELLED
+}
+
+enum TransferPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+// ==========================================
+// MODELS
+// ==========================================
+
+model User {
+  id                 String     @id @default(uuid())
+  name               String
+  email              String     @unique
+  passwordHash       String
+  employeeId         String     @unique
+  role               Role       @default(HOSPITAL_MANAGER)
+  facilityId         String?
+  status             UserStatus @default(ACTIVE)
+  mustChangePassword Boolean    @default(true)
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+
+  // Relationships
+  facility           Facility?  @relation(fields: [facilityId], references: [id], onDelete: SetNull)
+  requestedTransfers Transfer[] @relation("RequestedByUser")
+  approvedTransfers  Transfer[] @relation("ApprovedByUser")
+  auditLogs          AuditLog[]
+
+  @@index([email])
+  @@index([employeeId])
+  @@index([facilityId])
+  @@index([role])
+  @@map("users")
+}
+
+model Facility {
+  id        String         @id @default(uuid())
+  name      String
+  type      FacilityType   @default(HOSPITAL)
+  address   String
+  district  String
+  state     String
+  latitude  Float
+  longitude Float
+  status    FacilityStatus @default(ACTIVE)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  // Relationships
+  users             User[]
+  inventory         Inventory[]
+  patientDemands    PatientDemand[]
+  predictions       Prediction[]
+  alerts            Alert[]
+  outgoingTransfers Transfer[]      @relation("SourceFacility")
+  incomingTransfers Transfer[]      @relation("DestinationFacility")
+
+  @@index([district, state])
+  @@index([type])
+  @@index([status])
+  @@map("facilities")
+}
+
+model Resource {
+  id          String           @id @default(uuid())
+  name        String
+  category    ResourceCategory @default(MEDICINE)
+  unit        String
+  description String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  // Relationships
+  inventory   Inventory[]
+  predictions Prediction[]
+  alerts      Alert[]
+  transfers   Transfer[]
+
+  @@index([category])
+  @@index([name])
+  @@map("resources")
+}
+
+model Inventory {
+  id               String   @id @default(uuid())
+  facilityId       String
+  resourceId       String
+  quantity         Int      @default(0)
+  dailyConsumption Float    @default(0.0)
+  safetyStock      Int      @default(10)
+  lastUpdated      DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Relationships
+  facility Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  resource Resource @relation(fields: [resourceId], references: [id], onDelete: Restrict)
+
+  @@unique([facilityId, resourceId])
+  @@index([facilityId])
+  @@index([resourceId])
+  @@map("inventory")
+}
+
+model PatientDemand {
+  id           String   @id @default(uuid())
+  facilityId   String
+  date         DateTime
+  patientCount Int      @default(0)
+  department   String?
+  createdAt    DateTime @default(now())
+
+  // Relationships
+  facility Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+
+  @@index([facilityId])
+  @@index([date])
+  @@index([facilityId, date])
+  @@map("patient_demand")
+}
+
+model Prediction {
+  id                    String    @id @default(uuid())
+  facilityId            String
+  resourceId            String
+  predictedDailyDemand  Float
+  predictedStockoutDate DateTime?
+  riskLevel             RiskLevel @default(LOW)
+  confidence            Float     @default(0.0)
+  explanation           String
+  predictionDate        DateTime  @default(now())
+  createdAt             DateTime  @default(now())
+
+  // Relationships
+  facility Facility @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  resource Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+
+  @@index([facilityId])
+  @@index([resourceId])
+  @@index([facilityId, resourceId])
+  @@index([riskLevel])
+  @@index([predictionDate])
+  @@map("predictions")
+}
+
+model Alert {
+  id         String        @id @default(uuid())
+  facilityId String
+  resourceId String?
+  type       AlertType
+  severity   AlertSeverity @default(INFO)
+  title      String
+  message    String
+  status     AlertStatus   @default(OPEN)
+  createdAt  DateTime      @default(now())
+  resolvedAt DateTime?
+
+  // Relationships
+  facility Facility  @relation(fields: [facilityId], references: [id], onDelete: Cascade)
+  resource Resource? @relation(fields: [resourceId], references: [id], onDelete: SetNull)
+
+  @@index([facilityId])
+  @@index([status])
+  @@index([severity])
+  @@map("alerts")
+}
+
+model Transfer {
+  id                    String           @id @default(uuid())
+  sourceFacilityId      String
+  destinationFacilityId String
+  resourceId            String
+  quantity              Int
+  status                TransferStatus   @default(REQUESTED)
+  priority              TransferPriority @default(MEDIUM)
+  requestedBy           String
+  approvedBy            String?
+  eta                   DateTime?
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+
+  // Relationships
+  sourceFacility      Facility @relation("SourceFacility", fields: [sourceFacilityId], references: [id], onDelete: Restrict)
+  destinationFacility Facility @relation("DestinationFacility", fields: [destinationFacilityId], references: [id], onDelete: Restrict)
+  resource            Resource @relation(fields: [resourceId], references: [id], onDelete: Restrict)
+  requester           User     @relation("RequestedByUser", fields: [requestedBy], references: [id], onDelete: Restrict)
+  approver            User?    @relation("ApprovedByUser", fields: [approvedBy], references: [id], onDelete: SetNull)
+
+  @@index([status])
+  @@index([sourceFacilityId])
+  @@index([destinationFacilityId])
+  @@map("transfers")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  action     String
+  entityType String
+  entityId   String?
+  metadata   Json?
+  ipAddress  String?
+  timestamp  DateTime @default(now())
+
+  // Relationships
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([timestamp])
+  @@map("audit_logs")
+}
