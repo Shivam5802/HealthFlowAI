@@ -21,6 +21,7 @@ import {
   Cpu,
   Layers,
   Sparkles,
+  Target,
   ArrowUpRight,
   FileText,
   AlertCircle,
@@ -76,7 +77,13 @@ export default function LandingPage() {
           <BrandLogo variant="horizontal" size="sm" href="/" />
 
           {/* Desktop Nav Links */}
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-slate-600" aria-label="Main Navigation">
+          <nav className="hidden md:flex items-center gap-7 text-sm font-medium text-slate-600" aria-label="Main Navigation">
+            <a
+              href="#"
+              className="relative text-teal-800 font-semibold py-1 after:content-[''] after:absolute after:bottom-[-20px] after:left-0 after:right-0 after:h-[2.5px] after:bg-teal-600 after:rounded-full"
+            >
+              Home
+            </a>
             <a href="#how-it-works" className="hover:text-teal-600 transition-colors">
               How It Works
             </a>
@@ -89,7 +96,7 @@ export default function LandingPage() {
             <a href="#roles" className="hover:text-teal-600 transition-colors">
               Workspaces
             </a>
-            <a href="#panda" className="hover:text-teal-600 transition-colors flex items-center gap-1">
+            <a href="#panda" className="hover:text-teal-600 transition-colors flex items-center gap-1.5">
               <Sparkles className="h-3.5 w-3.5 text-teal-600" />
               Panda AI
             </a>
@@ -107,7 +114,7 @@ export default function LandingPage() {
             ) : (
               <Link
                 href="/login"
-                className="inline-flex items-center justify-center px-4 py-2 text-sm font-semibold rounded-lg bg-slate-900 text-white hover:bg-slate-800 shadow-sm transition-all"
+                className="inline-flex items-center justify-center px-5 py-2 text-sm font-semibold rounded-lg bg-[#111c2e] text-white hover:bg-[#1b2b44] shadow-sm transition-all"
               >
                 Login
               </Link>
@@ -130,6 +137,13 @@ export default function LandingPage() {
         {/* Mobile Dropdown */}
         {mobileMenuOpen && (
           <div className="md:hidden border-b border-slate-200 bg-white px-4 pt-2 pb-6 space-y-3">
+            <a
+              href="#"
+              onClick={() => setMobileMenuOpen(false)}
+              className="block px-3 py-2 text-base font-semibold text-teal-700 bg-teal-50/60 rounded-md"
+            >
+              Home
+            </a>
             <a
               href="#how-it-works"
               onClick={() => setMobileMenuOpen(false)}
@@ -179,133 +193,102 @@ export default function LandingPage() {
       </header>
 
       {/* ==================================================
-          HERO SECTION
+          HERO SECTION (Matching Reference Image)
       ================================================== */}
-      <section className="relative overflow-hidden pt-12 pb-20 md:pt-20 md:pb-28">
+      <section className="relative overflow-hidden pt-12 pb-20 md:pt-16 md:pb-28 bg-[#fbfcfd]">
+        {/* Subtle atmospheric teal background glow behind artwork */}
+        <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[700px] h-[550px] bg-gradient-to-l from-teal-50/80 via-cyan-50/40 to-transparent rounded-full blur-3xl pointer-events-none -z-10" />
+
+        {/* Ambient floating medical cross motifs in background */}
+        <div className="absolute right-12 top-16 text-teal-600/15 pointer-events-none select-none text-2xl font-light">
+          +
+        </div>
+        <div className="absolute right-8 bottom-16 text-teal-600/15 pointer-events-none select-none text-3xl font-light">
+          +
+        </div>
+        <div className="absolute right-[46%] top-12 text-teal-600/10 pointer-events-none select-none text-xl font-light">
+          +
+        </div>
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
-            {/* Left Copy */}
-            <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-teal-50 border border-teal-200 text-teal-800 text-xs font-semibold uppercase tracking-wider">
-                <Image src="/icon-transparent.png" alt="HealthFlow AI" width={16} height={16} className="h-4 w-4 object-contain" />
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-4 items-center">
+            {/* Left Column (50-55%) */}
+            <div className="lg:col-span-6 xl:col-span-6 space-y-6 text-left z-10">
+              {/* Badge */}
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#dcf5ef] border border-[#b8ebe1] text-[#008f75] text-[11px] font-bold uppercase tracking-wider">
+                <svg className="h-3.5 w-3.5 text-[#008f75]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <rect width="18" height="18" x="3" y="3" rx="2" />
+                  <path d="M9 3v18" />
+                  <path d="M15 3v18" />
+                  <path d="M3 9h18" />
+                  <path d="M3 15h18" />
+                </svg>
                 Healthcare Resource Intelligence
               </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 leading-[1.15]">
-                HEALTHFLOW <span className="text-teal-600">AI</span>
-                <span className="block text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-600 mt-2">
+              {/* Main Heading & Tagline */}
+              <div>
+                <h1 className="text-4xl sm:text-5xl lg:text-[76px] font-black tracking-tight text-[#0f172a] leading-[1.02]">
+                  HEALTHFLOW <span className="text-[#00a884]">AI</span>
+                </h1>
+                <p className="text-2xl sm:text-3xl lg:text-[42px] font-bold text-[#334155] tracking-tight mt-2 sm:mt-3">
                   &ldquo;Predict. Prevent. Protect.&rdquo;
-                </span>
-              </h1>
+                </p>
+              </div>
 
-              <p className="text-lg text-slate-600 max-w-2xl leading-relaxed mx-auto lg:mx-0">
+              {/* Product Description */}
+              <p className="text-base sm:text-lg text-slate-600 max-w-xl leading-relaxed">
                 Predict healthcare resource shortages before they become critical. HealthFlow AI
                 connects facility inventory, demand trends, risk intelligence, and resource
                 redistribution in one platform.
               </p>
 
-              {/* CTAs */}
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start pt-2">
+              {/* CTA Buttons */}
+              <div className="flex flex-wrap items-center gap-4 pt-2">
                 <a
                   href="#how-it-works"
-                  className="inline-flex items-center justify-center px-6 py-3.5 rounded-xl bg-teal-600 text-white font-semibold text-base hover:bg-teal-700 shadow-md shadow-teal-600/20 transition-all hover:scale-[1.02]"
+                  className="inline-flex items-center justify-center px-6 py-3.5 rounded-xl bg-[#009b7c] hover:bg-[#00876c] text-white font-semibold text-base shadow-sm transition-all hover:scale-[1.01]"
                 >
-                  Explore the Platform
+                  Explore the Platform <ArrowRight className="ml-2 h-4 w-4" />
                 </a>
                 <Link
                   href="/login"
-                  className="inline-flex items-center justify-center px-6 py-3.5 rounded-xl bg-white border border-slate-300 text-slate-800 font-semibold text-base hover:bg-slate-50 hover:border-slate-400 shadow-sm transition-all"
+                  className="inline-flex items-center justify-center px-6 py-3.5 rounded-xl bg-white border border-slate-200 text-slate-800 font-semibold text-base hover:bg-slate-50 hover:border-slate-300 shadow-sm transition-all"
                 >
                   Login to Portal <ArrowRight className="ml-2 h-4 w-4 text-slate-500" />
                 </Link>
               </div>
 
-              {/* Trust Badge */}
-              <div className="pt-4 flex items-center justify-center lg:justify-start gap-6 text-xs text-slate-500">
+              {/* Three Feature Indicators */}
+              <div className="pt-6 flex flex-wrap items-center gap-3 sm:gap-5 text-xs text-slate-600 font-medium">
                 <span className="flex items-center gap-1.5">
-                  <ShieldCheck className="h-4 w-4 text-teal-600" /> Facility-Level Isolation
+                  <ShieldCheck className="h-4 w-4 text-[#009b7c]" />
+                  <span>Facility-Level Visibility</span>
                 </span>
+                <span className="hidden sm:inline-block h-3.5 w-px bg-slate-300" />
                 <span className="flex items-center gap-1.5">
-                  <Cpu className="h-4 w-4 text-teal-600" /> Grounded AI Decisions
+                  <Target className="h-4 w-4 text-[#009b7c]" />
+                  <span>Granular AI Decisions</span>
                 </span>
+                <span className="hidden sm:inline-block h-3.5 w-px bg-slate-300" />
                 <span className="flex items-center gap-1.5">
-                  <Layers className="h-4 w-4 text-teal-600" /> Role-Based Security
+                  <Layers className="h-4 w-4 text-[#009b7c]" />
+                  <span>Role-Based Security</span>
                 </span>
               </div>
             </div>
 
-            {/* Right Visual (Interactive/Data Preview Mockup) */}
-            <div className="lg:col-span-5">
-              <div className="relative mx-auto max-w-md lg:max-w-none">
-                {/* Decorative glow */}
-                <div className="absolute -inset-1.5 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-2xl blur-lg opacity-25" />
-
-                {/* Dashboard Snapshot Card */}
-                <div className="relative rounded-2xl border border-slate-200/90 bg-white p-6 shadow-xl space-y-5">
-                  {/* Top Bar */}
-                  <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-                    <div className="flex items-center gap-2">
-                      <span className="h-3 w-3 rounded-full bg-emerald-500 animate-pulse" />
-                      <span className="text-xs font-bold text-slate-800 tracking-wide">
-                        DISTRICT SURVEILLANCE FEED
-                      </span>
-                    </div>
-                    <span className="text-[11px] font-medium text-slate-400">Live Simulation</span>
-                  </div>
-
-                  {/* Highlight Metric */}
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100">
-                      <span className="text-xs text-slate-500 block">Surplus Donor</span>
-                      <p className="text-sm font-bold text-slate-900 mt-0.5 truncate">
-                        District General Hosp.
-                      </p>
-                      <span className="inline-block mt-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">
-                        850 units (~17d supply)
-                      </span>
-                    </div>
-                    <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-100">
-                      <span className="text-xs text-rose-600 font-medium block">Critical Shortage</span>
-                      <p className="text-sm font-bold text-slate-900 mt-0.5 truncate">
-                        PHC Bakshi Ka Talab
-                      </p>
-                      <span className="inline-block mt-1 text-[11px] font-semibold text-rose-700 bg-rose-100/80 px-2 py-0.5 rounded">
-                        150 units (~2d stockout)
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Reallocation Recommendation Card */}
-                  <div className="p-4 rounded-xl bg-teal-50/70 border border-teal-200/80 space-y-2">
-                    <div className="flex items-center justify-between text-xs font-semibold text-teal-900">
-                      <span className="flex items-center gap-1.5">
-                        <Sparkles className="h-4 w-4 text-teal-600" />
-                        AI Redistribution Match
-                      </span>
-                      <span className="bg-teal-200/60 text-teal-800 text-[10px] px-2 py-0.5 rounded-full font-bold">
-                        FEASIBLE
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-600 leading-snug">
-                      Transfer <strong>300 units</strong> of Medicine X from District General Hospital to
-                      PHC Bakshi Ka Talab before projected stockout on Day 3.
-                    </p>
-                    <div className="pt-1 flex items-center justify-between text-[11px] text-teal-700">
-                      <span>Burn Rate: 75/day</span>
-                      <span className="font-semibold">Transit: ~2.5 hrs</span>
-                    </div>
-                  </div>
-
-                  {/* Activity Bar */}
-                  <div className="pt-1 flex items-center justify-between text-xs text-slate-500 border-t border-slate-100">
-                    <span className="flex items-center gap-1.5">
-                      <Truck className="h-3.5 w-3.5 text-slate-400" /> 4 Active Transfers
-                    </span>
-                    <span className="text-teal-600 font-semibold flex items-center gap-1">
-                      100% Grounded Logic
-                    </span>
-                  </div>
-                </div>
+            {/* Right Artwork (45-50% width, seamlessly blended into background) */}
+            <div className="lg:col-span-6 xl:col-span-6 relative flex items-center justify-center lg:justify-end">
+              <div className="relative w-full max-w-lg lg:max-w-2xl select-none pointer-events-none mt-8 lg:mt-0">
+                <Image
+                  src="/hero-network-blended.png"
+                  alt="HealthFlow AI Connected Healthcare Network"
+                  width={1118}
+                  height={858}
+                  priority
+                  className="w-full h-auto object-contain [mask-image:linear-gradient(to_right,transparent,black_10%,black)]"
+                />
               </div>
             </div>
           </div>
