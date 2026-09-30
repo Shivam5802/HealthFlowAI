@@ -27,6 +27,13 @@ export class ApiError extends Error {
   }
 }
 
+const apiCache = new Map<string, { data: any; expiry: number }>();
+const CACHE_TTL_MS = 15000; // 15 seconds cache for fast tab switching
+
+export function invalidateApiCache(): void {
+  apiCache.clear();
+}
+
 export async function request<T>(
   endpoint: string,
   options: RequestInit = {}
@@ -35,10 +42,27 @@ export async function request<T>(
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
   const url = `${baseUrl}${cleanEndpoint}`;
 
+  const method = (options.method || 'GET').toUpperCase();
+
+  // If writing or mutating data, invalidate cache so fresh data is loaded
+  if (method !== 'GET') {
+    apiCache.clear();
+  }
+
   // Retrieve stored token on client side
   let token: string | null = null;
   if (typeof window !== 'undefined') {
     token = localStorage.getItem('healthflow_token');
+  }
+
+  // Check cache for GET requests
+  const cacheKey = `${token || 'anon'}:${url}`;
+  if (method === 'GET' && apiCache.has(cacheKey)) {
+    const cached = apiCache.get(cacheKey)!;
+    if (Date.now() < cached.expiry) {
+      return cached.data as T;
+    }
+    apiCache.delete(cacheKey);
   }
 
   const headers: Record<string, string> = {
@@ -82,7 +106,11 @@ export async function request<T>(
       );
     }
 
-    return (data as ApiResponse<T>).data;
+    const result = (data as ApiResponse<T>).data;
+    if (method === 'GET') {
+      apiCache.set(cacheKey, { data: result, expiry: Date.now() + CACHE_TTL_MS });
+    }
+    return result;
   } catch (err: unknown) {
     if (err instanceof ApiError) {
       throw err;
