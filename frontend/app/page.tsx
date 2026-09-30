@@ -228,10 +228,10 @@ export default function LandingPage() {
 
               {/* Main Heading & Tagline */}
               <div>
-                <h1 className="text-4xl sm:text-5xl lg:text-[76px] font-black tracking-tight text-[#0f172a] leading-[1.02]">
+                <h1 className="text-[clamp(1.85rem,6.2vw,4.75rem)] font-black tracking-tight text-[#0f172a] leading-[1.05] whitespace-nowrap">
                   HEALTHFLOW <span className="text-[#00a884]">AI</span>
                 </h1>
-                <p className="text-2xl sm:text-3xl lg:text-[42px] font-bold text-[#334155] tracking-tight mt-2 sm:mt-3">
+                <p className="text-[clamp(1.15rem,3.6vw,2.5rem)] font-bold text-[#334155] tracking-tight mt-2 sm:mt-3 whitespace-nowrap">
                   &ldquo;Predict. Prevent. Protect.&rdquo;
                 </p>
               </div>
