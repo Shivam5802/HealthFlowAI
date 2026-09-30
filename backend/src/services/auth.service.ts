@@ -5,8 +5,15 @@ import { AppError } from '../utils/response.js';
 import { AuthenticatedUser } from '../types/index.js';
 
 export class AuthService {
-  async login(email: string, password: string): Promise<{ token: string; user: AuthenticatedUser }> {
-    const user = await userRepository.findByEmail(email);
+  async login(identifier: string, password: string): Promise<{ token: string; user: AuthenticatedUser }> {
+    const cleanId = (identifier || '').trim();
+    let user = await userRepository.findByEmail(cleanId.toLowerCase());
+    if (!user) {
+      user = await userRepository.findByEmployeeId(cleanId.toUpperCase());
+    }
+    if (!user) {
+      user = await userRepository.findByEmail(cleanId);
+    }
     if (!user) {
       throw new AppError('Invalid email or password', 401, 'INVALID_CREDENTIALS');
     }

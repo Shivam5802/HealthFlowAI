@@ -14,8 +14,23 @@ export const createApp = (): Express => {
   app.use(helmet());
   app.use(
     cors({
-      origin: config.corsOrigin,
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        if (!config.corsOrigin || config.corsOrigin === '*' || config.corsOrigin === 'all') {
+          return callback(null, origin);
+        }
+        const allowed = config.corsOrigin
+          .split(',')
+          .map((o) => o.trim().replace(/\/+$/, ''));
+        const cleanOrigin = origin.replace(/\/+$/, '');
+        if (allowed.includes('*') || allowed.includes(cleanOrigin)) {
+          return callback(null, origin);
+        }
+        return callback(null, origin);
+      },
       credentials: true,
+      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+      allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
     })
   );
 

@@ -56,7 +56,21 @@ export async function request<T>(
       headers,
     });
 
-    const data = await res.json();
+    let data: any;
+    const contentType = res.headers.get('content-type') || '';
+    if (contentType.includes('application/json')) {
+      data = await res.json();
+    } else {
+      const text = await res.text();
+      if (!res.ok) {
+        throw new ApiError(
+          `API request returned HTTP ${res.status} from ${url}. ${text.slice(0, 150) || res.statusText}`,
+          'HTTP_ERROR',
+          res.status
+        );
+      }
+      data = { success: true, data: text };
+    }
 
     if (!res.ok || !data.success) {
       const err = data as ApiErrorResponse;
@@ -74,7 +88,11 @@ export async function request<T>(
       throw err;
     }
     const message = err instanceof Error ? err.message : 'Network communication error';
-    throw new ApiError(message, 'NETWORK_ERROR', 0);
+    throw new ApiError(
+      `${message} (Connecting to: ${url}). Check backend status & NEXT_PUBLIC_API_URL.`,
+      'NETWORK_ERROR',
+      0
+    );
   }
 }
 

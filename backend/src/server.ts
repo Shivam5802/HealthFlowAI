@@ -1,10 +1,11 @@
 import { createApp } from './app.js';
 import { config } from './config/index.js';
 import { prisma } from './repositories/prisma.js';
+import { bootstrapDatabaseIfNeeded } from './utils/bootstrap.js';
 
 const app = createApp();
 
-const server = app.listen(config.port, () => {
+const server = app.listen(config.port, async () => {
   console.log(`=========================================`);
   console.log(`HEALTHFLOW AI - Backend Service`);
   console.log(`"Predict. Prevent. Protect."`);
@@ -14,6 +15,9 @@ const server = app.listen(config.port, () => {
   console.log(`API Base:    http://localhost:${config.port}/api`);
   console.log(`Healthcheck: http://localhost:${config.port}/api/health`);
   console.log(`=========================================`);
+
+  // Auto-populate demo users and baseline data if database is empty
+  await bootstrapDatabaseIfNeeded();
 });
 
 // Graceful shutdown handling
