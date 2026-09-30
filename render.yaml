@@ -61,8 +61,8 @@ services:
     runtime: node
     plan: free
     rootDir: frontend
-    buildCommand: npm install && npm run build
-    startCommand: npm run start
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npx next start
     envVars:
       - key: NODE_ENV
         value: production
