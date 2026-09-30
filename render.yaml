@@ -1,0 +1,85 @@
+services:
+  # ----------------------------------------------------
+  # 1. Backend Service (Express + Prisma + TypeScript)
+  # ----------------------------------------------------
+  - type: web
+    name: healthflow-backend
+    runtime: node
+    plan: free
+    rootDir: backend
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npx prisma db push && npm run start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 5000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: healthflow-postgres
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: CORS_ORIGIN
+        value: '*'
+      - key: ML_SERVICE_URL
+        fromService:
+          type: web
+          name: healthflow-ml-service
+          property: host
+      - key: GEMINI_API_KEY
+        sync: false
+
+  # ----------------------------------------------------
+  # 2. ML Prediction Service (FastAPI + Python)
+  # ----------------------------------------------------
+  - type: web
+    name: healthflow-ml-service
+    runtime: python
+    plan: free
+    rootDir: ml-service
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: ENVIRONMENT
+        value: production
+      - key: PORT
+        value: 8000
+
+  # ----------------------------------------------------
+  # 3. Frontend Web Service (Next.js 15)
+  # (Can be run on Render or deployed to Vercel)
+  # ----------------------------------------------------
+  - type: web
+    name: healthflow-frontend
+    runtime: node
+    plan: free
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: NEXT_PUBLIC_API_URL
+        fromService:
+          type: web
+          name: healthflow-backend
+          property: host
+          path: /api
+
+# ------------------------------------------------------
+# Managed PostgreSQL Database
+# ------------------------------------------------------
+databases:
+  - name: healthflow-postgres
+    databaseName: healthflow_db
+    user: healthflow_user
+    plan: free

@@ -16,15 +16,15 @@ export interface RiskAssessmentPayload {
 }
 
 export class MLClientService {
-  private baseUrl: string;
-
-  constructor() {
-    this.baseUrl = config.mlServiceUrl;
+  private getBaseUrl(): string {
+    const raw = process.env.ML_SERVICE_URL || config.mlServiceUrl || 'http://localhost:8000';
+    return raw.endsWith('/') ? raw : `${raw}/`;
   }
 
   async predictDemand(payload: DemandPredictionPayload) {
     try {
-      const response = await fetch(`${this.baseUrl}/api/v1/predict/demand`, {
+      const url = new URL('api/v1/predict/demand', this.getBaseUrl()).toString();
+      const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
@@ -51,7 +51,8 @@ export class MLClientService {
 
   async assessRisk(payload: RiskAssessmentPayload) {
     try {
-      const response = await fetch(`${this.baseUrl}/api/v1/predict/risk`, {
+      const url = new URL('api/v1/predict/risk', this.getBaseUrl()).toString();
+      const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
